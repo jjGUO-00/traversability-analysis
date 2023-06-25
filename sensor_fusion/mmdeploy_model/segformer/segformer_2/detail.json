@@ -1,0 +1,67 @@
+{
+    "version": "0.14.0",
+    "codebase": {
+        "task": "Segmentation",
+        "codebase": "mmseg",
+        "version": "0.30.0",
+        "pth": "mmsegmentation/checkpoints/segformer/segformer_mit-b2_8x1_1024x1024_160k_cityscapes_20211207_134205-6096669a.pth",
+        "config": "mmsegmentation/configs/segformer/segformer_mit-b2_8x1_1024x1024_160k_cityscapes.py"
+    },
+    "codebase_config": {
+        "type": "mmseg",
+        "task": "Segmentation",
+        "with_argmax": true
+    },
+    "onnx_config": {
+        "type": "onnx",
+        "export_params": true,
+        "keep_initializers_as_inputs": false,
+        "opset_version": 11,
+        "save_file": "end2end.onnx",
+        "input_names": [
+            "input"
+        ],
+        "output_names": [
+            "output"
+        ],
+        "input_shape": [
+            1024,
+            1024
+        ],
+        "optimize": true
+    },
+    "backend_config": {
+        "type": "tensorrt",
+        "common_config": {
+            "fp16_mode": false,
+            "max_workspace_size": 1073741824
+        },
+        "model_inputs": [
+            {
+                "input_shapes": {
+                    "input": {
+                        "min_shape": [
+                            1,
+                            3,
+                            1024,
+                            1024
+                        ],
+                        "opt_shape": [
+                            1,
+                            3,
+                            1024,
+                            1024
+                        ],
+                        "max_shape": [
+                            1,
+                            3,
+                            1024,
+                            1024
+                        ]
+                    }
+                }
+            }
+        ]
+    },
+    "calib_config": {}
+}

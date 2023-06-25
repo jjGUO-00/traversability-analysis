@@ -1,0 +1,44 @@
+<launch>
+    
+    <!--- Sim Time -->
+    <param name="/use_sim_time" value="true" />
+    <arg name="ns_1" default="/robot_1"/>
+    <arg name="ns_2" default="/robot_2"/>
+    <arg name="ns_3" default="/robot_3"/>
+
+    <!--fastlio param-->
+    <rosparam command="load" file="$(find fast_lio)/config/velodyne_city_env.yaml" />
+    <!-- <rosparam command="load" file="$(find fast_lio)/config/velodyne_husky.yaml" /> -->
+    <param name="feature_extract_enable" type="bool" value="0"/>
+    <param name="point_filter_num" type="int" value="4"/>
+    <param name="max_iteration" type="int" value="3" />
+    <param name="filter_size_surf" type="double" value="0.5" />
+    <param name="filter_size_map" type="double" value="0.5" />
+    <param name="cube_side_length" type="double" value="1000" />
+    <param name="runtime_pos_log_enable" type="bool" value="0" />
+
+    <!-- spawn robot 1-->
+    <group ns="/robot_1">
+        <!--- TF -->
+        <node pkg="tf" type="static_transform_publisher" name="camera_init_to_map"  args="0 0 0 0 0 0 $(arg ns_1)/map    $(arg ns_1)/camera_init 10" />
+        <node pkg="tf" type="static_transform_publisher" name="odom_to_footprint" args="0 0 0 0 0 0   $(arg ns_1)/body $(arg ns_1)/base_footprint   10" />
+
+        <!--- Run Traversability Mapping -->    
+        <node pkg="traversability_mapping" type="traversability_filter"  name="traversability_filter"  output="screen">
+        <param name="namespace" value="/robot_1"/>
+        </node>
+        <node pkg="traversability_mapping" type="traversability_map"     name="traversability_map"     output="screen">
+        <param name="namespace" value="/robot_1"/>
+        </node>
+        <!--- Fastlio2 -->
+        <node pkg="fast_lio" type="fastlio_mapping" name="laserMapping" output="screen" >    
+        <param name="namespace" value="/robot_1"/>
+        <!-- <param name="common/imu_topic" value= "$(arg ns_1)/imu/data"/>
+        <param name="common/lid_topic" value= "$(arg ns_1)/rs_points"/> -->
+        </node>
+
+    </group>
+
+
+    <node pkg="rviz" type="rviz" name="rviz" output="log" args="-d $(find traversability_mapping)/launch/include/traversability_mapping_three_robots.rviz" />
+</launch>
